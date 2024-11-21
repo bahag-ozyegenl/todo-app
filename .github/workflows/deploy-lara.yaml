@@ -158,7 +158,7 @@ jobs:
         with:
           service: fullstack-lara
           image: gcr.io/${{ secrets.GCP_PROJECT_ID}}/fullstack-lara
-          region: ${{ secrets.GCP_REGION }}
+          region: europe-west1
           platform: managed
           allow-authenticated: true
         

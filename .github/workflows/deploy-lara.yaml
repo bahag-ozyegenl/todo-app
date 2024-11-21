@@ -162,35 +162,6 @@ jobs:
           platform: managed
           allow-authenticated: true
         
-
-      # - name: Set up Docker Buildx
-      #   uses: docker/setup-buildx-action@v2
-
-      # - name: Build Docker image
-      #   uses: docker/build-push-action@v4
-      #   with:
-      #     context: backend/.
-      #     push: false
-      #     tags: fullstack-lara:latest
-      #     platforms: linux/amd64
-      
-      # - name: Deploy to Cloud Run
-      #   uses: google-github-actions/deploy-cloudrun@main
-      #   with:
-      #     service: fullstack-lara
-      #     image: gcr.io/${{ secrets.GCP_PROJECT_ID }}/fullstack-lara:latest
-      #     region: europe-west1
-      #     platform: managed
-
-
-      # - name: Allow unauthenticated access
-      #   run: |
-      #     gcloud run services add-iam-policy-binding fullstack-lara \
-      #       --member="allUsers" \
-      #       --role="roles/run.invoker" \
-      #       --region=europe-west1 \
-      #       --platform=managed
-
       - name: Wait for server to be ready
         run: sleep 10
 
@@ -212,15 +183,35 @@ jobs:
           cd frontend
           npm run build --legacy-peer-deps
 
-      - name: Install specific vercel version
-        run: npm install -g vercel@39.0.5
- 
-      - name: Deploy to Vercel
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      - name: Build and Push Docker Image
+        working-directory: ./frontend
         run: |
-          cd frontend
-          npx vercel deploy --prod --token $VERCEL_TOKEN --confirm
+          docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/frontend-lara:latest .
+          docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/frontend-lara:latest
+
+      - name: Deploy to Cloud Run
+        uses: google-github-actions/deploy-cloudrun@v1
+        with:
+          service: frontend-lara
+          image: gcr.io/${{ secrets.GCP_PROJECT_ID}}/frontend-lara:latest
+          region: europe-west1
+          platform: managed
+          allow-authenticated: true
+        
+      - name: Wait for server to be ready
+        run: sleep 10
+
+
+      # - name: Install specific vercel version
+      #   run: npm install -g vercel@39.0.5
+ 
+      # - name: Deploy to Vercel
+      #   env:
+      #     VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      #   run: |
+      #     cd frontend
+      #     npx vercel deploy --prod --token $VERCEL_TOKEN --confirm
+
 
       # - name: Install dependencies
       #   run: |

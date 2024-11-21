@@ -117,7 +117,14 @@ jobs:
           image: gcr.io/${{ secrets.GCP_PROJECT_ID }}/fullstack-lara:latest
           region: europe-west1
           platform: managed
-          allow-unauthenticated: true
+
+      - name: Allow unauthenticated access
+        run: |
+          gcloud run services add-iam-policy-binding fullstack-lara \
+            --member="allUsers" \
+            --role="roles/run.invoker" \
+            --region=europe-west1 \
+            --platform=managed
 
       - name: Wait for server to be ready
         run: sleep 10

@@ -94,6 +94,33 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
+      - name: Install dependencies
+        run: |
+          ls
+          pwd
+          cd backend
+          pwd
+          npm install
+
+      - name: Start the server (if applicable)
+        run: |
+          cd backend
+          npm start &
+        env:
+          DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
+          DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
+          DATABASE_DATABASE: ${{ secrets.DATABASE_DATABASE }}
+          DATABASE_USER: ${{ secrets.DATABASE_USER }}
+          DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+          # nodemailer_email: ${{ secrets.nodemailer_email }}
+          # nodemailer_password: ${{ secrets.nodemailer_password }}
+          # PORT: ${{ secrets.PORT  }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }} }}
+
+
+      - name: Wait for server to be ready
+        run: sleep 10
+
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v1
         with:
@@ -128,6 +155,9 @@ jobs:
 
       - name: Wait for server to be ready
         run: sleep 10
+
+
+
 
       - name: Install dependencies for frontend
         run: |

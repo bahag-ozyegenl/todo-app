@@ -156,7 +156,7 @@ jobs:
       - name: Deploy to Cloud Run
         uses: google-github-actions/deploy-cloudrun@v1
         with:
-          service: shop-bk-ivonne
+          service: fullstack-lara
           image: gcr.io/${{ secrets.GCP_PROJECT_ID}}/fullstack-lara
           region: ${{ secrets.GCP_REGION }}
           platform: managed

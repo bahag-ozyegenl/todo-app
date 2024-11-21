@@ -109,7 +109,7 @@ jobs:
         env:
           DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
           DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
-          DATABASE_DATABASE: ${{ secrets.DATABASE_DATABASE }}
+          DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
           DATABASE_USER: ${{ secrets.DATABASE_USER }}
           DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
           # nodemailer_email: ${{ secrets.nodemailer_email }}
@@ -146,8 +146,8 @@ jobs:
         run: |
           docker build --build-arg DATABASE_HOST=${{ secrets.DATABASE_HOST }} \
             --build-arg DATABASE_PORT=${{ secrets.DATABASE_PORT }} \
-            --build-arg DATABASE_DATABASE=${{ secrets.DATABASE_DATABASE }} \
-            --build-arg DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }} \
+            --build-arg DATABASE_NAME=${{ secrets.DATABASE_NAME }} \
+            --build-arg DATABASE_USER=${{ secrets.DATABASE_USER }} \
             --build-arg DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }} \
             --build-arg JWT_SECRET=${{ secrets.JWT_SECRET }} \
             -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/fullstack-lara:latest .

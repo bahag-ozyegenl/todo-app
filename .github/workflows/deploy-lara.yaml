@@ -126,32 +126,63 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Build Docker image
-        uses: docker/build-push-action@v4
+      - name: Docker Auth
+        id: docker-auth
+        uses: 'docker/login-action@v1'
         with:
-          context: backend/.
-          push: false
-          tags: fullstack-lara:latest
-          platforms: linux/amd64
-      
-      - name: Deploy to Cloud Run
-        uses: google-github-actions/deploy-cloudrun@main
-        with:
-          service: fullstack-lara
-          image: gcr.io/${{ secrets.GCP_PROJECT_ID }}/fullstack-lara:latest
-          region: europe-west1
-          platform: managed
+          username: 'oauth2accesstoken'
+          password: '${{ steps.auth.outputs.access_token }}'
+          registry: 'gcr.io'
 
-      - name: Allow unauthenticated access
+      - name: Build and Push Docker Image
+        working-directory: ./backend
         run: |
-          gcloud run services add-iam-policy-binding fullstack-lara \
-            --member="allUsers" \
-            --role="roles/run.invoker" \
-            --region=europe-west1 \
-            --platform=managed
+          docker build --build-arg DATABASE_HOST=${{ secrets.DATABASE_HOST }} \
+            --build-arg DATABASE_PORT=${{ secrets.DATABASE_PORT }} \
+            --build-arg DATABASE_DATABASE=${{ secrets.DATABASE_DATABASE }} \
+            --build-arg DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }} \
+            --build-arg DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }} \
+            --build-arg JWT_SECRET=${{ secrets.JWT_SECRET }} \
+            -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/fullstack-lara:latest .
+          docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/fullstack-lara:latest
+
+      - name: Deploy to Cloud Run
+        uses: google-github-actions/deploy-cloudrun@v1
+        with:
+          service: shop-bk-ivonne
+          image: gcr.io/${{ secrets.GCP_PROJECT_ID}}/fullstack-lara
+          region: ${{ secrets.GCP_REGION }}
+          platform: managed
+          allow-authenticated: true
+        
+
+      # - name: Set up Docker Buildx
+      #   uses: docker/setup-buildx-action@v2
+
+      # - name: Build Docker image
+      #   uses: docker/build-push-action@v4
+      #   with:
+      #     context: backend/.
+      #     push: false
+      #     tags: fullstack-lara:latest
+      #     platforms: linux/amd64
+      
+      # - name: Deploy to Cloud Run
+      #   uses: google-github-actions/deploy-cloudrun@main
+      #   with:
+      #     service: fullstack-lara
+      #     image: gcr.io/${{ secrets.GCP_PROJECT_ID }}/fullstack-lara:latest
+      #     region: europe-west1
+      #     platform: managed
+
+
+      # - name: Allow unauthenticated access
+      #   run: |
+      #     gcloud run services add-iam-policy-binding fullstack-lara \
+      #       --member="allUsers" \
+      #       --role="roles/run.invoker" \
+      #       --region=europe-west1 \
+      #       --platform=managed
 
       - name: Wait for server to be ready
         run: sleep 10

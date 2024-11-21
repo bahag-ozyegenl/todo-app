@@ -141,7 +141,7 @@ jobs:
           password: '${{ steps.auth.outputs.access_token }}'
           registry: 'gcr.io'
 
-      - name: Build and Push Docker Image
+      - name: Build and Push Docker Image for backend
         working-directory: ./backend
         run: |
           docker build --build-arg DATABASE_HOST=${{ secrets.DATABASE_HOST }} \
@@ -183,7 +183,7 @@ jobs:
           cd frontend
           npm run build --legacy-peer-deps
 
-      - name: Build and Push Docker Image
+      - name: Build and Push Docker Image for frontend
         working-directory: ./frontend
         run: |
           docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/frontend-lara:latest .
